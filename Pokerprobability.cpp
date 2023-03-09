@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
+#include <random>
+#include <chrono>
 using namespace std;
 
 enum class suit : short
@@ -38,10 +40,38 @@ private:
     pips v;
 };
 
+ostream &operator<<(ostream &out, const suit &s)
+{
+    switch (s)
+    {
+    case suit::CLUB:
+        out << "C";
+        break;
+    case suit::DIAMOND:
+        out << "D";
+        break;
+    case suit::HEART:
+        out << "H";
+        break;
+    case suit::SPADE:
+        out << "S";
+        break;
+    default:
+        out << "Invalid Suit";
+        break;
+    }
+    return out;
+}
+
 ostream &operator<<(ostream &out, const card &c)
 {
     cout << c.v << c.s; // presumes << overloaded for pips and suit
     return out;
+}
+ostream &operator<<(ostream &os, const pips &p)
+{
+    os << p.v;
+    return os;
 }
 void init_deck(vector<card> &d)
 {
@@ -69,8 +99,8 @@ void init_deck(vector<card> &d)
 
 void print(vector<card> &deck)
 {
-    for (auto p = deck.begin(); p != deck.end(); ++p)
-        cout << *p;
+    for (auto cardval : deck)
+        cout << cardval;
     cout << endl;
 }
 bool is_flush(vector<card> &hand)
@@ -89,9 +119,9 @@ bool is_straight(vector<card> &hand)
         pips_v[i++] = (p->get_pips()).get_pips();
     sort(pips_v, pips_v + 5); // stl iterator range
     if (pips_v[0] != 1)       // non-aces
-        return (pips_v[0] == pips_v[1] - 1 && pips_v[1] == pips_v[2] - 1) && (pips_v[2] == pips_v[3] - 1 && pips_v[3] == pips_v[4] - 1);
+        return ((pips_v[0] == pips_v[1] - 1 && pips_v[1] == pips_v[2] - 1) && (pips_v[2] == pips_v[3] - 1 && pips_v[3] == pips_v[4] - 1));
     else // aces have a special logic
-        return (pips_v[0] == pips_v[1] - 1 && pips_v[1] == pips_v[2] - 1 && (pips_v[2]) == pips_v[3] - 1 && pips_v[3] == pips_v[4] - 1) || (pips_v[1] == 10) && (pips_v[2] == 11) && (pips_v[3] == 12) && (pips_v[4] == 13);
+        return ((pips_v[0] == pips_v[1] - 1 && pips_v[1] == pips_v[2] - 1 && (pips_v[2]) == pips_v[3] - 1 && pips_v[3] == pips_v[4] - 1) || (pips_v[1] == 10) && (pips_v[2] == 11) && (pips_v[3] == 12) && (pips_v[4] == 13));
 }
 // straight flush
 bool is_straight_flush(vector<card> &hand)
@@ -113,7 +143,7 @@ int main()
 
     for (int loop = 0; loop < how_many; ++loop)
     {
-        std::shuffle(deck.begin(), deck.end()); // STL algorithm
+        std::shuffle(deck.begin(), deck.end(), std::mt19937(std::chrono::steady_clock::now().time_since_epoch().count())); // STL algorithm
         vector<card> hand(5);
         int i = 0;
         for (auto p = deck.begin(); i < 5; ++p)
